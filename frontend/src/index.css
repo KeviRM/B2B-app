@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brandPrimary: #1E40AF;
+  --color-brandSuccess: #16A34A;
+}
+
+/* --- ESTILOS PERSONALIZADOS --- */
+/* Barra de desplazamiento moderna para el carrusel */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9; /* Un gris muy sutil */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #b2bcc8; /* El color de la barrita */
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* Se oscurece un poco al pasar el mouse */
+}
