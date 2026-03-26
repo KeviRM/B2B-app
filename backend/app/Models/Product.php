@@ -11,6 +11,7 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
+        'category_id',
         'sku',
         'name',
         'description',
@@ -29,5 +30,10 @@ class Product extends Model
     public function tiers()
     {
         return $this->hasMany(ProductTier::class)->orderBy('min_quantity', 'asc');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }

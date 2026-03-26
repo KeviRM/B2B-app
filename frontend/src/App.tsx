@@ -10,6 +10,7 @@ import MiniCart from './components/MiniCart';
 import CartPage from './components/CartPage';
 import CheckoutPage from './components/CheckoutPage';
 import UserProfilePage from './components/UserProfilePage';
+import ProductDetailPage from './components/ProductDetailPage';
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePageContent />} />
           <Route path="/catalogo" element={<CatalogPage />} />
+
+          <Route path="/producto/:id" element={<ProductDetailPage />} />
+          
           <Route path="/carrito" element={<CartPage />} /> 
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/perfil" element={<UserProfilePage />} />
