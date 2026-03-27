@@ -1,16 +1,19 @@
 import { NavLink } from 'react-router-dom';
 import logo from '../assets/logo2.png'; 
 import { useCart } from '../context/CartContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
+  const navigate = useNavigate();
 
+  
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) => 
     isActive 
       ? "text-black font-bold uppercase tracking-wide border-b-4 border-black pb-1" 
       : "text-gray-600 hover:text-black font-semibold uppercase tracking-wide";
-  
+   
   const { getTotalItems, openCart } = useCart();
 
   return (
@@ -44,9 +47,14 @@ export default function Header() {
           {/* 3. Acciones Derecha (Usuario y Carrito) */}
           <div className="flex items-center space-x-8">
                       
-            <Link to="/perfil" className="flex items-center text-gray-800 hover:text-brandPrimary font-medium transition-colors">
+            {/* <Link to="/perfil" className="flex items-center text-gray-800 hover:text-brandPrimary font-medium transition-colors">
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-              Mi Perfil {/* O cambiamos el texto a "Mi Perfil" */}
+              Mi Perfil 
+            </Link> */}
+
+            <Link to="/login" className="flex items-center text-gray-800 hover:text-brandPrimary font-medium transition-colors">
+              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              Inicia Sesión
             </Link>
             
 

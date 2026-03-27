@@ -25,3 +25,12 @@ export interface ApiCategory {
   name: string;
   slug: string;
 }
+
+
+export interface ApiUser {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  role: 'admin' | 'customer';
+}

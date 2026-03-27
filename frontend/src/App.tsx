@@ -12,6 +12,9 @@ import CheckoutPage from './components/CheckoutPage';
 import UserProfilePage from './components/UserProfilePage';
 import ProductDetailPage from './components/ProductDetailPage';
 
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
+
 function App() {
   return (
     <div className="min-h-screen font-sans bg-gray-50 flex flex-col">
@@ -28,6 +31,10 @@ function App() {
           <Route path="/carrito" element={<CartPage />} /> 
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/perfil" element={<UserProfilePage />} />
+
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegisterPage />} />
+
         </Routes>
       </main>
 
