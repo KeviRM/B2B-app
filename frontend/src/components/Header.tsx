@@ -1,12 +1,25 @@
 import { NavLink } from 'react-router-dom';
 import logo from '../assets/logo2.png'; 
 import { useCart } from '../context/CartContext';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const navigate = useNavigate();
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  
+  const {user, isAuthenticated, logout} = useAuth();
+  
+  /* Funcion para el cierre de sesion */
+
+  const handleLogout = () => {
+    logout();
+    setIsMobileMenuOpen(false);
+    navigate('/');
+  }
   
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) => 
@@ -18,7 +31,10 @@ export default function Header() {
 
   return (
     <header className="bg-white border-b-2 border-black sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              
+
         <div className="flex justify-between items-center h-20">
           
           {/* Navegación Izquierda */}
@@ -35,6 +51,23 @@ export default function Header() {
             </NavLink>
           </nav>
 
+
+          <div className="flex items-center md:hidden">
+              <button 
+              onClick={() =>
+                setIsMobileMenuOpen(!isMobileMenuOpen)
+              }
+              className="text-gray-600 hover:text-black focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black">
+                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {isMobileMenuOpen ? (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  ) : (
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  )}
+                </svg>
+              </button>
+            </div>
+
           {/*  Logo Central  */}
           <div className="shrink-0 flex items-center justify-center">
             <div className="w-20 h-20 bg-white rounded-full border-4 border-black flex items-center justify-center shadow-sm relative -bottom-4">
@@ -47,16 +80,37 @@ export default function Header() {
           {/* 3. Acciones Derecha (Usuario y Carrito) */}
           <div className="flex items-center space-x-8">
                       
-            {/* <Link to="/perfil" className="flex items-center text-gray-800 hover:text-brandPrimary font-medium transition-colors">
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-              Mi Perfil 
-            </Link> */}
 
-            <Link to="/login" className="flex items-center text-gray-800 hover:text-brandPrimary font-medium transition-colors">
+
+              {isAuthenticated && user ? (
+                <Link to="/perfil" className="md:flex items-center hidden text-gray-800 hover:text-brandPrimary font-medium transition-colors">
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                Mi Perfil 
+              </Link> 
+
+              
+
+              ):(
+                
+  
+            <Link to="/login" className="md:flex items-center hidden text-gray-800 hover:text-brandPrimary font-medium transition-colors">
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
               Inicia Sesión
             </Link>
+
+              )}
+
             
+          
+              {isAuthenticated && user ?(
+                <button onClick={handleLogout}
+                
+                className="md:flex items-center hidden text-gray-800 hover:text-red-500 font-medium transition-colors"
+                >
+                  <svg className="w-6 h-6 mr-2 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg> 
+                  Cerrar Sesión
+                </button>
+              ): null}
 
             <button 
             onClick={openCart}
@@ -72,10 +126,70 @@ export default function Header() {
                 </span>
               )}
             </button>
+
+
+
+
+
+
+      
+
+
+
           </div>
 
         </div>
-      </div>
+      </nav>
+
+
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t-2 border-black flex flex-col items-center space-y-4 py-4 h-full animate-[fadeIn_0.3s_ease-out]">
+          <NavLink to="/" className={getNavLinkClass} onClick={() => setIsMobileMenuOpen(false)}>
+            Inicio
+          </NavLink>
+          <NavLink to="/catalogo" className={getNavLinkClass} onClick={() => setIsMobileMenuOpen(false)}>
+            Catálogo
+          </NavLink>
+          <NavLink to="/contactos" className={getNavLinkClass} onClick={() => setIsMobileMenuOpen(false)}>
+            Contactos
+          </NavLink>
+
+
+
+          
+              {isAuthenticated && user ? (
+                <Link to="/perfil" className="md:hidden items-center mt-15 flex bg-gray-800 text-white hover:text-brandPrimary font-medium transition-colors rounded border border-gray-800 p-2">
+                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                Mi Perfil 
+              </Link> 
+
+              
+
+              ):(
+                
+  
+            <Link to="/login" className="md:hidden items-center flex text-gray-800 hover:text-brandPrimary font-medium transition-colors">
+              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+              Inicia Sesión
+            </Link>
+
+              )}
+
+            
+          
+              {isAuthenticated && user ?(
+                <button onClick={handleLogout}
+                
+                className="md:hidden items-center flex text-red-500 font-medium transition-colors"
+                >
+                  <svg className="w-6 h-6 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg> 
+                  Cerrar Sesión
+                </button>
+              ): null}
+        </div>
+      )}
+
     </header>
   );
 }

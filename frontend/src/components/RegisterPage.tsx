@@ -174,13 +174,13 @@ export default function RegisterPage() {
               type="submit"
               className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg shadow-sm text-lg font-bold text-white bg-[#1E40AF] hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1E40AF] transition-colors mt-6"
             >
-              Registrar Negocio
+              Registrar Cuenta
             </button>
           </form>
 
           <div className="mt-8 text-center border-t border-gray-100 pt-6">
             <p className="text-sm text-gray-600">
-              ¿Ya tienes una cuenta corporativa?{' '}
+              ¿Ya tienes una cuenta?{' '}
               <Link to="/login" className="font-bold text-[#1E40AF] hover:text-blue-800">
                 Inicia sesión aquí
               </Link>

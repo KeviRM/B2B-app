@@ -13,12 +13,14 @@ export interface CartItem {
 
 interface CartContextType {
   cart: CartItem[];
-  isCartOpen: boolean; // <-- Nuevo: ¿El panel está abierto?
+  isCartOpen: boolean; 
   addToCart: (item: CartItem) => void;
-  removeFromCart: (id: number) => void; // <-- Nuevo: Para borrar cosas
+  removeFromCart: (id: number) => void; 
   getTotalItems: () => number;
-  openCart: () => void; // <-- Nuevo: Abrir panel
-  closeCart: () => void; // <-- Nuevo: Cerrar panel
+  updateQuantity: (id: number, quantity: number) => void;
+  openCart: () => void; 
+  closeCart: () => void; 
+
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -53,8 +55,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
+  const updateQuantity = (id: number, quantity: number) => {
+    setCart(prevCart => 
+      prevCart.map(item => 
+        item.id === id ? { ...item, quantity: quantity } : item
+      )
+    );
+  };
+
+  
+
   return (
-    <CartContext.Provider value={{ cart, isCartOpen, addToCart, removeFromCart, getTotalItems, openCart, closeCart }}>
+    <CartContext.Provider value={{ cart, isCartOpen, addToCart, removeFromCart, getTotalItems, updateQuantity, openCart, closeCart }}>
       {children}
     </CartContext.Provider>
   );

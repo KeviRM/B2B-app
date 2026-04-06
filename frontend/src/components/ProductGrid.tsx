@@ -27,6 +27,8 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('relevancia');
 
+  const [quantity, setQuantity] = useState(1);
+
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/products`)
       .then(res => res.json())
@@ -87,7 +89,7 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-brandPrimary focus:border-transparent outline-none"
           />
-          <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+          <span className="absolute left-3 top-2.5 text-gray-400"></span>
           {searchTerm && (
             <button 
               onClick={() => setSearchTerm('')} 
@@ -159,12 +161,25 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
                 </div>
 
                 <div className="flex gap-2">
+
+
+
                   <input 
-                    type="number" 
-                    defaultValue="1" 
+                    type="number"
+                    defaultValue= "1"
+                    
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+
                     min="1" 
                     className="w-16 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-brandPrimary outline-none font-bold"
                   />
+
+
+
+
+
+
+
                   <button 
                     onClick={() => addToCart({
                       id: product.id,
@@ -172,12 +187,12 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
                       name: product.name,
                       price: `$${product.price}`,
                       bulkPrice: firstTier ? `$${firstTier.price}` : `$${product.price}`,
-                      quantity: 1,
+                      quantity: quantity,
                       img: ''
                     })}
                     className="flex-1 bg-gray-900 text-white font-bold py-2 rounded-md hover:bg-brandPrimary transition-colors flex justify-center items-center"
                   >
-                    <span className="mr-2">🛒</span> Agregar
+                    <span className="mr-2">+</span> Agregar
                   </button>
                 </div>
               </div>

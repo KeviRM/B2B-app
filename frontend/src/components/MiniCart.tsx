@@ -38,7 +38,7 @@ export default function MiniCart() {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           {cart.length === 0 ? (
             <div className="text-center text-gray-500 mt-10">
-              <span className="text-4xl mb-4 block">🛒</span>
+              <span className="text-4xl mb-4 block"></span>
               <p>Tu carrito está vacío.</p>
             </div>
           ) : (
@@ -53,8 +53,10 @@ export default function MiniCart() {
                     <p className="text-xs text-gray-500 mt-1">Cant: {item.quantity} cajas</p>
                     <p className="text-brandSuccess font-bold mt-1">{item.bulkPrice}</p>
                   </div>
-                  <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-500 p-2">
-                    🗑️
+                  <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-500 p-2">
+                    {/* trash */}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg >
+                    
                   </button>
                 </div>
               ))}

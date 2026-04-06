@@ -91,7 +91,6 @@ export default function ProductDetailPage() {
       quantity: quantity,
       img: 'x' // Emoji temporal hasta que tengamos imágenes
     });
-    // Opcional: Redirigir al catálogo después de agregar
      navigate('/catalogo'); 
   };
 
