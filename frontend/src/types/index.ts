@@ -34,3 +34,12 @@ export interface ApiUser {
   phone?: string;
   role: 'admin' | 'customer';
 }
+
+
+export interface ApiAddress {
+  id: number;
+  street_and_number: string;
+  neighborhood: string;
+  references: string | null;
+  is_default: boolean;
+}

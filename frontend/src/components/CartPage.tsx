@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import MPLogo from '../assets/MP_Logo.svg';
 
+import { STORE_CONFIG } from '../config/store';
+
 
 export default function CartPage() {
 
@@ -17,11 +19,11 @@ export default function CartPage() {
     return total + (priceToUse * item.quantity);
   }, 0);
 
-    const FREE_SHIPPING_THRESHOLD = 3000;
-  const porcentajeProgreso = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
-  const faltante = Math.max(FREE_SHIPPING_THRESHOLD - subtotal, 0);
-  const envio = subtotal >= FREE_SHIPPING_THRESHOLD ? 50 : 200;  
-  const total = subtotal + envio;
+    const porcentajeProgreso = Math.min((subtotal / STORE_CONFIG.FREE_SHIPPING_THRESHOLD) * 100, 100);
+    const faltante = Math.max(STORE_CONFIG.FREE_SHIPPING_THRESHOLD - subtotal, 0);
+    const envio = subtotal >= STORE_CONFIG.FREE_SHIPPING_THRESHOLD ? 0 : STORE_CONFIG.BASE_SHIPPING_COST;  
+    const total = subtotal + envio;
+  
 
 
 

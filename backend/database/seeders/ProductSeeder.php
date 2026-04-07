@@ -12,8 +12,23 @@ class ProductSeeder extends Seeder
     {
         // 1. Creamos algunas categorías de prueba para tu B2B
         $categoriaSalsas = Category::create(['name' => 'Salsas Artesanales', 'slug' => 'salsas-artesanales']);
+        $categoriaPan = Category::create(['name' => 'Pan Artesanal', 'slug' => 'pan-artesanal']);
         
 
+        $pan1 = Product::create([
+            'category_id' => $categoriaPan->id, // <-- Asignamos la categoría
+            'sku' => 'PAL-PAN-250',
+            'name' => 'Pan Artesanal "Pa\' Llevar" 250g',
+            'description' => 'Pan artesanal hecho con ingredientes naturales. Ideal para acompañar tus comidas.',
+            'price' => 50.00,
+            'stock' => 200,
+            'is_active' => true,
+        ]);
+        $pan1->tiers()->createMany([
+            ['min_quantity' => 12, 'price' => 45.00],
+            ['min_quantity' => 24, 'price' => 40.00],
+        ]);
+        
         // 2. SALSA ROJO BRAVO
         $rojoBravo = Product::create([
             'category_id' => $categoriaSalsas->id, // <-- Asignamos la categoría

@@ -1,6 +1,6 @@
-
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { ApiUser } from '../types';
+// src/context/AuthContext.tsx
+import { createContext, useContext, useState, ReactNode } from 'react';
+import type{ ApiUser } from '../types';
 
 interface AuthContextType {
   user: ApiUser | null;
@@ -13,19 +13,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<ApiUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  // Al cargar la app, revisamos si ya había una sesión guardada
-  useEffect(() => {
-    const storedToken = localStorage.getItem('auth_token');
+  
+  // SOLUCIÓN: Leemos el localStorage de forma síncrona al inicializar el estado
+  const [user, setUser] = useState<ApiUser | null>(() => {
     const storedUser = localStorage.getItem('auth_user');
-    
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem('auth_token');
+  });
 
   const login = (newToken: string, userData: ApiUser) => {
     setToken(newToken);
@@ -50,8 +47,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
-  }
+  if (context === undefined) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
