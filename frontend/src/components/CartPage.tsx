@@ -21,7 +21,7 @@ export default function CartPage() {
 
     const porcentajeProgreso = Math.min((subtotal / STORE_CONFIG.FREE_SHIPPING_THRESHOLD) * 100, 100);
     const faltante = Math.max(STORE_CONFIG.FREE_SHIPPING_THRESHOLD - subtotal, 0);
-    const envio = subtotal >= STORE_CONFIG.FREE_SHIPPING_THRESHOLD ? 0 : STORE_CONFIG.BASE_SHIPPING_COST;  
+    const envio = subtotal >= STORE_CONFIG.FREE_SHIPPING_THRESHOLD ? STORE_CONFIG.DISCOUNT_SHIPPING : STORE_CONFIG.BASE_SHIPPING_COST;
     const total = subtotal + envio;
   
 
@@ -209,9 +209,12 @@ export default function CartPage() {
             </Link>
 
           {/* Sello de Confianza Mercado Pago */}
-          <div className="text-center mt-2">
-            <p className="text-sm font-semibold text-gray-600 mb-2">Pago 100% seguro</p>
-            <div className="flex justify-center items-center text-blue-500 font-bold text-xl">
+          <div className="flex justify-center items-center gap-6 mt-2">
+            <div className="flex items-center text-gray-600 font-bold text-sm">
+              <svg className="w-10 h-10 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+              <span>Pago 100%<br/>seguro</span>
+            </div>
+             <div className="flex justify-center items-center text-blue-500 font-bold text-xl">
               
                  <img src={MPLogo} alt="Mercado Pago" className='w-sm h-sm' />
                   

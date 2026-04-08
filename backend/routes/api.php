@@ -40,6 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /* Rutas de pedidos */
     Route::post('/orders/calculate', [OrderController::class, 'calculate']);
 
+    Route::post('/orders', [OrderController::class, 'store']);
+
 });
 
 
