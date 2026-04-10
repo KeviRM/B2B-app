@@ -50,6 +50,22 @@ class OrderController extends Controller
         ]);
     }
 
+
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        $orders = Order::where('user_id', $user->id)
+            ->with([
+                'items.product', 
+                'address'        
+            ])
+            ->latest() 
+            ->get();
+
+        return response()->json($orders);
+    }
+
     public function store(Request $request)
     {
         $request->validate([

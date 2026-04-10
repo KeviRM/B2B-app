@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
     /* Rutas de pedidos */
+    Route::get('/orders', [OrderController::class, 'index']); 
     Route::post('/orders/calculate', [OrderController::class, 'calculate']);
 
     Route::post('/orders', [OrderController::class, 'store']);

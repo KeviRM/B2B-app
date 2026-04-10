@@ -2,12 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import type{ ApiAddress } from '../types';
+import type{ ApiAddress, ApiOrder, ApiOrderItem } from '../types';
 
-const orders = [
-  { id: '#PED-0002', status: 'En Ruta', date: '19/03/26', total: '$2106.00', statusColor: 'bg-blue-800' },
-  { id: '#PED-0001', status: 'Entregado', date: '19/02/26', total: '$1950.00', statusColor: 'bg-green-700' },
-];
 
 export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState('Información personal');
@@ -19,6 +15,10 @@ export default function UserProfilePage() {
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({ street_and_number: '', neighborhood: '', references: '' });
   const [isSubmitting, setIsSubmitting] = useState(false); 
+
+  // Estados de Órdenes
+  const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(true);
 
   // Proteger la ruta
   useEffect(() => {
@@ -73,12 +73,45 @@ export default function UserProfilePage() {
     }
   };
 
+
+
+
+
+  // Traer el historial de pedidos
+  useEffect(() => {
+    if (token) {
+      fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+        headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setOrders(data);
+        }
+      })
+      .catch(err => console.error("Error cargando pedidos:", err))
+      .finally(() => setLoadingOrders(false));
+    }
+  }, [token]);
+
+
+
+
+
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
   if (!user) return null;
+
+
+
+
+  const formatDate = (dateString: string) => {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('es-MX', options);
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white min-h-screen">
@@ -158,8 +191,8 @@ export default function UserProfilePage() {
                   <div key={order.id} className="border border-gray-400 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 bg-white">
                     <div className="w-full md:w-3/12 font-extrabold text-3xl text-gray-800">{order.id}</div>
                     <div className="w-full md:w-2/12 flex flex-col items-center md:border-l border-gray-300">
-                      <span className={`${order.statusColor} text-white px-6 py-2 rounded-full font-bold text-sm w-full text-center max-w-[140px]`}>{order.status}</span>
-                      <span className="text-sm font-bold text-gray-800 mt-2">{order.date}</span>
+                      <span className={`${order.statusColor} text-white px-6 py-2 rounded-full font-bold text-sm w-full text-center max-w-35`}>{order.status}</span>
+                      <span className="text-sm font-bold text-gray-800 mt-2">{formatDate(order.created_at)}</span>
                     </div>
                     <div className="w-full md:w-3/12 text-center font-bold text-green-600 text-lg md:border-l border-gray-300">{order.total}</div>
                     <div className="w-full md:w-4/12 flex flex-col xl:flex-row gap-3 justify-center pl-0 md:pl-4">

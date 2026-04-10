@@ -43,3 +43,25 @@ export interface ApiAddress {
   references: string | null;
   is_default: boolean;
 }
+
+
+
+export interface ApiOrderItem {
+  id: number;
+  product_id: number;
+  quantity: number;
+  price: string;
+  product: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface ApiOrder {
+  id: number;
+  total: string;
+  status: string;
+  created_at: string;
+  items: ApiOrderItem[];
+  statusColor: string;
+}
