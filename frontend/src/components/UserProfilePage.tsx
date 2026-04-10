@@ -84,10 +84,14 @@ export default function UserProfilePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white min-h-screen">
       
       <div className="flex items-center mb-10 relative border-b border-gray-300 pb-6">
+        <div className="flex">
+
         <Link to="/" className="absolute left-0 flex items-center text-gray-600 hover:text-black font-semibold">
           <svg className="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           <span className="text-sm font-bold">Volver</span>
         </Link>
+        </div>
+        
         <h1 className="text-3xl font-bold w-full text-center md:text-left md:ml-32 text-gray-800">
           Perfil de Usuario
         </h1>

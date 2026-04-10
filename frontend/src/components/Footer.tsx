@@ -36,7 +36,7 @@ export default function Footer() {
               <span>+52 (241) 123 4567</span>
             </li>
             <li className="flex items-center">
-              <span className="mr-2">✉️</span>
+              <span className="mr-2"></span>
               <span>ventas@distribuidora.com</span>
             </li>
           </ul>

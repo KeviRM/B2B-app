@@ -1,5 +1,5 @@
 // src/components/CheckoutPage.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,16 @@ import type{ ApiAddress } from '../types';
 import MPLogo from '../assets/MP_Logo.svg';
 
 import { STORE_CONFIG } from '../config/store';
+
+import { CardPayment} from '@mercadopago/sdk-react';
+
+import { initMercadoPago } from '@mercadopago/sdk-react';
+
+initMercadoPago(import.meta.env.VITE_MP_PUBLIC_KEY, {
+  locale: 'es-MX'
+});
+
+
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -18,6 +28,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'tarjeta' | 'transferencia' | 'oxxo'>('tarjeta');
   const [orderNotes, setOrderNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const [isSuccess, setIsSuccess] = useState(false); 
 
   // Estados de Direcciones
   const [addresses, setAddresses] = useState<ApiAddress[]>([]);
@@ -30,8 +42,8 @@ export default function CheckoutPage() {
   //  Proteger la ruta
   useEffect(() => {
     if (!user || !token) navigate('/login');
-    else if (cart.length === 0) navigate('/carrito');
-  }, [user, token, cart, navigate]);
+    else if (cart.length === 0 && !isSuccess) navigate('/carrito');
+  }, [user, token, cart, navigate, isSuccess]);
 
   //  Traer las direcciones del usuario desde Laravel
   useEffect(() => {
@@ -60,7 +72,8 @@ export default function CheckoutPage() {
 
 
 
-  //  Matemáticas del Carrito 
+  
+
   const getNumericPrice = (priceStr: string) => parseFloat(priceStr.replace(/[^0-9.-]+/g, '')) || 0;
   
   const subtotal = cart.reduce((total, item) => {
@@ -72,7 +85,6 @@ export default function CheckoutPage() {
   const envio = subtotal >= FREE_SHIPPING_THRESHOLD ? STORE_CONFIG.DISCOUNT_SHIPPING : STORE_CONFIG.BASE_SHIPPING_COST;
   const total = subtotal + envio;
 
-  // 4. Procesar Pedido (Simulación)
   const handlePlaceOrder = () => {
     if (!selectedAddressId) {
       alert("Por favor selecciona una dirección de entrega.");
@@ -81,14 +93,79 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    // Simulamos que Laravel está guardando el pedido en la BD (lo haremos en el siguiente paso)
     setTimeout(() => {
-      alert("¡Pedido realizado con éxito!");
+
       if(clearCart) clearCart();
-      navigate('/perfil'); // Lo enviamos a ver sus compras
+      navigate('/perfil'); 
     }, 2000);
   };
 
+
+  // --- MEMOIZACIÓN PARA EVITAR QUE MERCADO PAGO COLAPSE ---
+  const mpInitialization = useMemo(() => {
+    return { amount: total };
+  }, [total]); 
+
+  const mpCustomization = useMemo(() => {
+    return {
+      visual: {
+        style: {
+          theme: 'default',
+          customVariables: {
+            textPrimaryColor: '#111827',
+            baseColor: '#1E40AF',
+          }
+        }
+      }
+    };
+  }, []); 
+
+
+  const handleCardPaymentSubmit = async (formData: any) => {
+    
+    if (!selectedAddressId) {
+      alert("Por favor selecciona una dirección de entrega antes de pagar.");
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      console.log("Datos seguros de la tarjeta generados por MP:", formData);
+    
+      const orderPayload = {
+        address_id: selectedAddressId,
+        payment_method: 'tarjeta',
+        items: cart.map(item => ({ id: item.id, quantity: item.quantity })),
+        notes: orderNotes,
+        mp_payment_data: formData 
+      };
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders`, {
+
+
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(orderPayload)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) throw new Error(result.message || 'Error al procesar el pago');
+      setIsSuccess(true);
+      if(clearCart) clearCart();
+      navigate('/perfil');
+    } catch (error: any) {
+      alert(error.message);
+    }
+      finally {
+      setIsProcessing(false);
+    }
+  };
 
   
 
@@ -110,13 +187,13 @@ export default function CheckoutPage() {
 
       <div className="flex flex-col lg:flex-row gap-12">
         
-        {/* COLUMNA IZQUIERDA: Formularios */}
+        {/*  Formularios */}
         <div className="flex-1">
           
-          {/* Fila Superior: Direcciones y Referencias */}
+          {/* Direcciones y Referencias */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
             
-            {/* Direcciones (Conectado a la API) */}
+            {/* Direcciones  */}
             <div>
               <h2 className="text-xl font-bold text-gray-900 mb-6">Dirección de Entrega</h2>
               <div className="space-y-4 mb-6">
@@ -136,7 +213,7 @@ export default function CheckoutPage() {
                         checked={selectedAddressId === addr.id}
                         onChange={() => {
                           setSelectedAddressId(addr.id);
-                          setOrderNotes(addr.references || ''); // Actualiza la nota al instante
+                          setOrderNotes(addr.references || ''); 
                         }}
                         className="w-6 h-6 text-blue-500 border-gray-300 focus:ring-blue-500" 
                       />
@@ -193,27 +270,46 @@ export default function CheckoutPage() {
 
             {/* Formulario Dinámico: Solo se muestra si es Tarjeta */}
             {paymentMethod === 'tarjeta' && (
-              <div className="space-y-6 animate-[fadeIn_0.3s_ease-out]">
-                <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">Numero de Tarjeta:</label>
-                  <input type="text" className="w-full border border-gray-400 py-3 px-4 rounded-full outline-none focus:border-black focus:ring-1 focus:ring-black" />
-                </div>
-                <div className="flex gap-6">
-                  <div className="flex-1">
-                    <label className="block text-sm font-bold text-gray-900 mb-2">Fecha de vencimiento:</label>
-                    <input type="text" placeholder="MM/YY" className="w-32 border border-gray-400 py-3 px-4 rounded-full outline-none text-center focus:border-black focus:ring-1 focus:ring-black" />
+              
+              <div className="animate-[fadeIn_0.3s_ease-out] border border-gray-200 rounded-xl p-1">
+
+
+
+                {isProcessing && (
+                  <div className="absolute inset-0 bg-white/95 z-10 flex flex-col items-center justify-center backdrop-blur-sm">
+                    <svg className="animate-spin h-12 w-12 text-blue-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p className="font-bold text-gray-800 text-xl mb-1">Procesando pago...</p>
+                    <p className="text-sm text-gray-500 font-medium">Por favor, no cierres esta ventana</p>
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-sm font-bold text-gray-900 mb-2">CVV:</label>
-                    <input type="text" className="w-24 border border-gray-400 py-3 px-4 rounded-full outline-none text-center focus:border-black focus:ring-1 focus:ring-black" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-900 mb-2">Nombre del Titular:</label>
-                  <input type="text" className="w-full border border-gray-400 py-3 px-4 rounded-full outline-none focus:border-black focus:ring-1 focus:ring-black" />
-                </div>
+                )}
+
+
+                <CardPayment
+                  initialization={mpInitialization} 
+                  onSubmit={handleCardPaymentSubmit}
+                  customization={mpCustomization}
+                     
+                />
               </div>
+
             )}
+
+
+            {paymentMethod !== 'tarjeta' && (
+              <button
+              onClick={handlePlaceOrder}
+              disabled={isProcessing || !selectedAddressId}
+              className={`w-full text-white font-bold text-2xl py-5 rounded-2xl transition-colors mb-6 tracking-wide flex flex-col items-center ${isProcessing || !selectedAddressId ? 'bg-gray-400 cursor-not-allowed' : 'bg-brandSuccess hover:bg-green-700'}`}
+              >
+                <span>{isProcessing ? 'Procesando...' : 'Confirmar Pedido'}</span>
+                <span> $ {total.toFixed(2)} </span>
+
+              </button>
+            )
+            }
 
             {/* Mensajes para otros métodos */}
             {paymentMethod === 'transferencia' && (
@@ -270,14 +366,14 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          <button 
+          {/* <button 
             onClick={handlePlaceOrder}
             disabled={isProcessing || !selectedAddressId}
             className={`w-full text-white font-bold text-2xl py-5 rounded-2xl transition-colors mb-6 tracking-wide flex flex-col items-center ${isProcessing || !selectedAddressId ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#16A34A] hover:bg-green-700'}`}
           >
             <span>{isProcessing ? 'Procesando...' : 'Confirmar y Pagar'}</span>
             <span>${total.toFixed(2)}</span>
-          </button>
+          </button> */}
 
           {!selectedAddressId && addresses.length > 0 && (
             <p className="text-red-500 text-sm font-bold text-center -mt-4 mb-4">Selecciona una dirección para continuar</p>
