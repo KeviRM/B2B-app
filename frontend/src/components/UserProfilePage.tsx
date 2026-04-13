@@ -1,13 +1,17 @@
 // src/components/UserProfilePage.tsx
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import type{ ApiAddress, ApiOrder, ApiOrderItem } from '../types';
+import type{ ApiAddress, ApiOrder} from '../types';
+
+import { useCart } from '../context/CartContext';
+
+
 
 
 export default function UserProfilePage() {
-  const [activeTab, setActiveTab] = useState('Información personal');
-
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || 'info');
 
   const { user, token, logout } = useAuth();
   const navigate = useNavigate();
@@ -19,6 +23,12 @@ export default function UserProfilePage() {
   // Estados de Órdenes
   const [orders, setOrders] = useState<ApiOrder[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
+
+
+  const { addToCart } = useCart();
+
+
+
 
   // Proteger la ruta
   useEffect(() => {
@@ -108,9 +118,52 @@ export default function UserProfilePage() {
 
 
 
+
+   // Lógica para volver a pedir
+  
+
+    const handleReorder = (order: ApiOrder) => {
+        order.items.forEach(item => {
+        const productForCart = {
+            id: item.product.id,
+            name: item.product.name,
+            sku: item.product.sku,                     // SKU Real de la BD
+            price: item.product.price,                 // Precio Base Real (Ej. $120.00)
+            img: item.product.image_url || '',         // Imagen Real
+            quantity: item.quantity,                   // Cantidad que pidió antes
+            tiers: item.product.tiers || [],           // Sus reglas de descuento
+        };
+        
+        if (addToCart) {    
+            addToCart(productForCart);
+        }
+        });
+
+        alert("Productos agregados al carrito exitosamente.");
+        navigate('/carrito');
+    };
+
+
+
+
+
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
     return new Date(dateString).toLocaleDateString('es-MX', options);
+  };
+
+
+  // Función para traducir el estado del backend a UI (Color y Texto)
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending_payment': return { text: 'Pendiente', bg: 'bg-yellow-500' };
+      case 'paid':            return { text: 'Pagado', bg: 'bg-green-500' };
+      case 'processing':      return { text: 'En proceso', bg: 'bg-blue-500' };
+      case 'shipped':         return { text: 'Enviado', bg: 'bg-purple-500' };
+      case 'delivered':       return { text: 'Entregado', bg: 'bg-gray-800' };
+      case 'cancelled':       return { text: 'Cancelado', bg: 'bg-red-500' };
+      default:                return { text: status, bg: 'bg-gray-400' };
+    }
   };
 
   return (
@@ -191,13 +244,28 @@ export default function UserProfilePage() {
                   <div key={order.id} className="border border-gray-400 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 bg-white">
                     <div className="w-full md:w-3/12 font-extrabold text-3xl text-gray-800">{order.id}</div>
                     <div className="w-full md:w-2/12 flex flex-col items-center md:border-l border-gray-300">
-                      <span className={`${order.statusColor} text-white px-6 py-2 rounded-full font-bold text-sm w-full text-center max-w-35`}>{order.status}</span>
+                      <span className={`${getStatusBadge(order.status).bg} text-white px-6 py-2 rounded-full font-bold text-sm w-full text-center max-w-35`}>
+                        {getStatusBadge(order.status).text}
+                      </span>
                       <span className="text-sm font-bold text-gray-800 mt-2">{formatDate(order.created_at)}</span>
                     </div>
                     <div className="w-full md:w-3/12 text-center font-bold text-green-600 text-lg md:border-l border-gray-300">{order.total}</div>
                     <div className="w-full md:w-4/12 flex flex-col xl:flex-row gap-3 justify-center pl-0 md:pl-4">
-                      <button className="bg-[#333333] text-white px-4 py-3 rounded-full font-bold text-sm flex-1 hover:bg-black transition-colors">Ver Detalles</button>
-                      <button className="bg-[#333333] text-white px-4 py-3 rounded-full font-bold text-sm flex-1 hover:bg-black transition-colors">Volver a Pedir</button>
+                      
+                      <Link 
+                          to={`/pedido/${order.id}`} 
+                          className="bg-[#333333] text-white px-4 py-3 rounded-full font-bold text-sm flex-1 text-center hover:bg-black transition-colors"
+                        >
+                          Ver Detalles
+                        </Link>
+
+
+                      <button 
+                        onClick={() => handleReorder(order)}
+                        className="bg-[#333333] text-white px-4 py-3 rounded-full font-bold text-sm flex-1 hover:bg-black transition-colors"
+                      >
+                        Volver a Pedir
+                      </button>
                     </div>
                   </div>
                 ))}

@@ -51,10 +51,7 @@ export interface ApiOrderItem {
   product_id: number;
   quantity: number;
   price: string;
-  product: {
-    id: number;
-    name: string;
-  };
+  product:ApiProduct;
 }
 
 export interface ApiOrder {

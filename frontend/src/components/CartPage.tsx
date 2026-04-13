@@ -10,22 +10,51 @@ export default function CartPage() {
 
   const { cart, updateQuantity, removeFromCart } = useCart();
 
+   const formatCurrency = (amount: string | number) => {
+    return '$' + parseFloat(amount.toString()).toFixed(2);
+  };
+  
+ 
 
   const getNumericPrice = (priceStr: string) => {
     return parseFloat(priceStr.replace(/[^0-9.-]+/g, '')) || 0;
   };
+
+  const getCurrentPrice = (item: any) => {
+    let currentPrice = getNumericPrice(item.price); // Empezamos con el precio base
+    
+    // Si el producto trae la tabla de descuentos (tiers) desde la BD
+    if (item.tiers && item.tiers.length > 0) {
+      // Buscamos el descuento aplicable según la cantidad actual
+      const applicableTier = [...item.tiers]
+        .filter((t: any) => item.quantity >= t.min_quantity)
+        .sort((a: any, b: any) => b.min_quantity - a.min_quantity)[0];
+        
+      if (applicableTier) {
+        currentPrice = parseFloat(applicableTier.price);
+      }
+    } 
+    // Retrocompatibilidad: Por si agregas un producto desde el catálogo que aún no trae 'tiers'
+    else if (item.bulkPrice && item.quantity >= 12) {
+      currentPrice = getNumericPrice(item.bulkPrice);
+    }
+    
+    return currentPrice;
+  };
+
+  // 1. Recalculamos el Subtotal usando el motor dinámico
   const subtotal = cart.reduce((total, item) => {
-    const priceToUse = item.bulkPrice ? getNumericPrice(item.bulkPrice) : getNumericPrice(item.price);
+    const priceToUse = getCurrentPrice(item);
     return total + (priceToUse * item.quantity);
   }, 0);
 
-    const porcentajeProgreso = Math.min((subtotal / STORE_CONFIG.FREE_SHIPPING_THRESHOLD) * 100, 100);
-    const faltante = Math.max(STORE_CONFIG.FREE_SHIPPING_THRESHOLD - subtotal, 0);
-    const envio = subtotal >= STORE_CONFIG.FREE_SHIPPING_THRESHOLD ? STORE_CONFIG.DISCOUNT_SHIPPING : STORE_CONFIG.BASE_SHIPPING_COST;
-    const total = subtotal + envio;
-  
+  const porcentajeProgreso = Math.min((subtotal / STORE_CONFIG.FREE_SHIPPING_THRESHOLD) * 100, 100);
+  const faltante = Math.max(STORE_CONFIG.FREE_SHIPPING_THRESHOLD - subtotal, 0);
+  const envio = subtotal >= STORE_CONFIG.FREE_SHIPPING_THRESHOLD ? STORE_CONFIG.DISCOUNT_SHIPPING : STORE_CONFIG.BASE_SHIPPING_COST;
+  const total = subtotal + envio;
 
 
+    
 
   if (cart.length === 0) {
     return (
@@ -107,7 +136,7 @@ export default function CartPage() {
 
 
               {cart.map((item) => {
-                const itemPrice = item.bulkPrice ? getNumericPrice(item.bulkPrice) : getNumericPrice(item.price);
+                const itemPrice = getCurrentPrice(item);
                 const itemTotal = itemPrice * item.quantity;
 
 
@@ -195,7 +224,23 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between items-center border-b border-gray-300 pb-4">
               <span>Envío</span>
-              <span className="font-normal text-gray-700">${envio.toFixed(2)}</span>
+
+                <div className="text-right">
+                {envio === STORE_CONFIG.DISCOUNT_SHIPPING ? (
+                <>
+                  {/* Precio base tachado */}
+                  <span className="text-gray-400 line-through text-sm font-medium">
+                    {formatCurrency(STORE_CONFIG.BASE_SHIPPING_COST)}
+                  </span>
+                  {/* Costo con descuento */}
+                  <span className="text-[#d17a7a]">{formatCurrency(envio)}</span>
+                </>
+              ) : (
+                /* Costo normal sin tachar nada */
+                <span className="text-[#d17a7a]">{formatCurrency(envio)}</span>
+              )}
+              </div>
+              
             </div>
           </div>
 

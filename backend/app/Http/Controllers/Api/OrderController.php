@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
+use App\Models\ProductTier;
 
 use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Payment\PaymentClient;
@@ -33,7 +34,15 @@ class OrderController extends Controller
         foreach ($items as $item) {
             $product = Product::find($item['id']);
             
-            $priceToUse = $product->bulk_price ? $product->bulk_price : $product->price;
+            $priceToUse = $product->price; 
+            $applicableTier = ProductTier::where('product_id', $product->id)
+                ->where('min_quantity', '<=', $item['quantity'])
+                ->orderBy('min_quantity', 'desc') 
+                ->first();
+
+            if ($applicableTier) {
+                $priceToUse = $applicableTier->price;
+            }
             
             $subtotal += ($priceToUse * $item['quantity']);
         }
@@ -57,13 +66,33 @@ class OrderController extends Controller
 
         $orders = Order::where('user_id', $user->id)
             ->with([
-                'items.product', 
+                'items.product.tiers', 
                 'address'        
             ])
             ->latest() 
             ->get();
 
         return response()->json($orders);
+    }
+
+
+    public function show($id, Request $request)
+    {
+        $user = $request->user();
+
+        $order = Order::with(['items.product.tiers', 'address'])
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        if (!$order) {
+            return response()->json(['message' => 'Pedido no encontrado'], 404);
+        }
+        
+
+
+
+        return response()->json($order);
     }
 
     public function store(Request $request)
@@ -85,7 +114,18 @@ class OrderController extends Controller
 
         foreach ($request->items as $item) {
             $product = Product::find($item['id']);
-            $priceToUse = $product->bulk_price ? $product->bulk_price : $product->price;
+            
+            $priceToUse = $product->price; 
+
+            // 2. Buscamos el tier dinámico
+            $applicableTier = ProductTier::where('product_id', $product->id)
+                ->where('min_quantity', '<=', $item['quantity'])
+                ->orderBy('min_quantity', 'desc')
+                ->first();
+
+            if ($applicableTier) {
+                $priceToUse = $applicableTier->price;
+            }
             
             $subtotal += ($priceToUse * $item['quantity']);
             

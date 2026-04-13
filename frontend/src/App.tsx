@@ -12,6 +12,8 @@ import CheckoutPage from './components/CheckoutPage';
 import UserProfilePage from './components/UserProfilePage';
 import ProductDetailPage from './components/ProductDetailPage';
 
+import OrderDetailPage from './components/OrderDetailPage'; 
+
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 
@@ -31,6 +33,7 @@ function App() {
           <Route path="/carrito" element={<CartPage />} /> 
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/perfil" element={<UserProfilePage />} />
+          <Route path="/pedido/:id" element={<OrderDetailPage />} />
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />

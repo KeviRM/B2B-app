@@ -33,30 +33,35 @@ export default function ProductDetailPage() {
   if (loading) return <div className="flex-1 flex justify-center items-center h-96"><div className="text-xl font-bold text-gray-500 animate-pulse">Cargando producto...</div></div>;
   if (!product) return <div className="flex-1 flex justify-center items-center h-96"><div className="text-xl font-bold text-red-500">Producto no encontrado</div></div>;
 
-  // --- LÓGICA DE PRECIOS ESCALONADOS ---
+  // --- LÓGICA DE PRECIOS ESCALONADOS (Blindada) ---
   const basePrice = parseFloat(product.price);
   
-  // Función para obtener el precio actual según la cantidad
+  // 1. Aseguramos que la tabla siempre se dibuje bien, sin importar cómo los mande la base de datos
+  const sortedTiers = [...product.tiers].sort((a, b) => a.min_quantity - b.min_quantity);
+
+  // 2. Motor dinámico idéntico al del Carrito
   const getCurrentPrice = () => {
     let current = basePrice;
-    // Asumimos que los tiers vienen ordenados de menor a mayor
-    product.tiers.forEach(tier => {
-      if (quantity >= tier.min_quantity) {
-        current = parseFloat(tier.price);
+    if (product.tiers && product.tiers.length > 0) {
+      const applicableTier = [...product.tiers]
+        .filter(t => quantity >= t.min_quantity)
+        .sort((a, b) => b.min_quantity - a.min_quantity)[0]; // Tomamos el mejor descuento aplicable
+        
+      if (applicableTier) {
+        current = parseFloat(applicableTier.price);
       }
-    });
+    }
     return current;
   };
 
   const currentPrice = getCurrentPrice();
   const total = currentPrice * quantity;
 
-  // Función para construir las filas de la tabla de descuentos
+  // 3. Función para construir las filas de la tabla usando los tiers ordenados
   const buildTierRows = () => {
     const rows = [];
     
-    // Fila 1: Precio Base
-    const nextTierQty = product.tiers.length > 0 ? product.tiers[0].min_quantity : null;
+    const nextTierQty = sortedTiers.length > 0 ? sortedTiers[0].min_quantity : null;
     rows.push({
       label: nextTierQty ? `1 - ${nextTierQty - 1} piezas` : '1+ piezas',
       price: basePrice,
@@ -64,9 +69,8 @@ export default function ProductDetailPage() {
       isActive: quantity >= 1 && (!nextTierQty || quantity < nextTierQty)
     });
 
-    // Filas de Mayoreo
-    product.tiers.forEach((tier, index) => {
-      const nextTier = product.tiers[index + 1];
+    sortedTiers.forEach((tier, index) => {
+      const nextTier = sortedTiers[index + 1];
       const tierPrice = parseFloat(tier.price);
       const savingsPercent = Math.round(((basePrice - tierPrice) / basePrice) * 100);
       
@@ -86,10 +90,10 @@ export default function ProductDetailPage() {
       id: product.id,
       sku: product.sku,
       name: product.name,
-      price: `$${basePrice.toFixed(2)}`,
-      bulkPrice: `$${currentPrice.toFixed(2)}`,
+      price: product.price, // Precio base puro directo de la BD
       quantity: quantity,
-      img: 'x' // Emoji temporal hasta que tengamos imágenes
+      img: product.image_url || 'x', 
+      tiers: product.tiers // 🚀 LA PIEZA FALTANTE: Ahora sí le mandamos las reglas al Carrito
     });
      navigate('/catalogo'); 
   };

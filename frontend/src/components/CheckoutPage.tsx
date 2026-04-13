@@ -72,12 +72,28 @@ export default function CheckoutPage() {
 
 
 
+  const formatCurrency = (amount: string | number) => {
+    return '$' + parseFloat(amount.toString()).toFixed(2);
+  };
   
 
   const getNumericPrice = (priceStr: string) => parseFloat(priceStr.replace(/[^0-9.-]+/g, '')) || 0;
-  
+
+  const getCurrentPrice = (item: any) => {
+    let currentPrice = getNumericPrice(item.price); 
+    if (item.tiers && item.tiers.length > 0) {
+      const applicableTier = [...item.tiers]
+        .filter((t: any) => item.quantity >= t.min_quantity)
+        .sort((a: any, b: any) => b.min_quantity - a.min_quantity)[0];
+      if (applicableTier) currentPrice = parseFloat(applicableTier.price);
+    } else if (item.bulkPrice && item.quantity >= 12) {
+      currentPrice = getNumericPrice(item.bulkPrice);
+    }
+    return currentPrice;
+  };
+
   const subtotal = cart.reduce((total, item) => {
-    const priceToUse = item.bulkPrice ? getNumericPrice(item.bulkPrice) : getNumericPrice(item.price);
+    const priceToUse = getCurrentPrice(item);
     return total + (priceToUse * item.quantity);
   }, 0);
 
@@ -334,7 +350,7 @@ export default function CheckoutPage() {
           {/* Lista Dinámica de Productos del Checkout */}
           <div className="mb-8 border-b border-gray-300 pb-6 space-y-3">
             {cart.map((item) => {
-               const itemTotal = (item.bulkPrice ? getNumericPrice(item.bulkPrice) : getNumericPrice(item.price)) * item.quantity;
+              const itemTotal = getCurrentPrice(item) * item.quantity;
                return (
                 <div key={item.id} className="flex justify-between items-center text-gray-800 font-bold mb-3">
                   <span className="truncate w-1/2" title={item.name}>- {item.name}</span>
@@ -353,11 +369,19 @@ export default function CheckoutPage() {
             <div className="flex justify-between items-center border-b border-gray-300 pb-4">
               <span>Envío</span>
               <div className="text-right">
-                {envio === 0 ? (
-                   <span className="font-bold text-green-600">Gratis</span>
-                ) : (
-                   <span className="font-normal text-gray-700">${envio.toFixed(2)}</span>
-                )}
+                {envio === STORE_CONFIG.DISCOUNT_SHIPPING ? (
+                <>
+                  {/* Precio base tachado */}
+                  <span className="text-gray-400 line-through text-sm font-medium">
+                    {formatCurrency(STORE_CONFIG.BASE_SHIPPING_COST)}
+                  </span>
+                  {/* Costo con descuento */}
+                  <span className="text-[#d17a7a]">{formatCurrency(envio)}</span>
+                </>
+              ) : (
+                /* Costo normal sin tachar nada */
+                <span className="text-[#d17a7a]">{formatCurrency(envio)}</span>
+              )}
               </div>
             </div>
             <div className="flex justify-between items-center text-xl pt-2">

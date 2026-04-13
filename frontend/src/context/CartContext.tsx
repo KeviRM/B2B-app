@@ -1,14 +1,16 @@
 // src/context/CartContext.tsx
 import { createContext, useContext, useState, ReactNode } from 'react';
+import type{ Tier } from '../types';
 
 export interface CartItem {
   id: number;
   sku: string;
   name: string;
   price: string;
-  bulkPrice: string;
+  bulkPrice?: string;
   quantity: number;
   img: string;
+  tiers?: Tier[];
 }
 
 interface CartContextType {
