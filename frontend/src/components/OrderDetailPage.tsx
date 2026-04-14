@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect} from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import type{ ApiOrderItem } from '../types';
 import { STORE_CONFIG } from '../config/store';
 import { useCart } from '../context/CartContext';
 import type{ ApiOrder } from '../types';
-
 
 
 interface Order {
@@ -47,6 +46,44 @@ export default function OrderDetailPage() {
   const navigate = useNavigate();
 
 
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false); 
+
+  // Motor de Descarga Real desde el Backend
+  const handleGeneratePDF = async () => {
+    try {
+      setIsGeneratingPDF(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/orders/${id}/ticket`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (!response.ok) throw new Error('Error al generar el PDF');
+
+      // Convertimos la respuesta en un archivo Blob
+      const blob = await response.blob();
+      
+      // Link invisible para forzar la descarga en el navegador
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Ticket_PED-${order?.id.toString().padStart(4, '0')}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // Limpiamos el link invisible
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+      console.error("Error descargando PDF:", error);
+      alert("Hubo un problema al descargar el ticket.");
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
+
+  
+
+
   useEffect(() => {
     if (token && id) {
       fetch(`${import.meta.env.VITE_API_URL}/orders/${id}`, {
@@ -75,11 +112,11 @@ export default function OrderDetailPage() {
         const productForCart = {
             id: item.product.id,
             name: item.product.name,
-            sku: item.product.sku,                     // SKU Real de la BD
-            price: item.product.price,                 // Precio Base Real (Ej. $120.00)
-            img: item.product.image_url || '',         // Imagen Real
-            quantity: item.quantity,                   // Cantidad que pidió antes
-            tiers: item.product.tiers || [],           // Sus reglas de descuento
+            sku: item.product.sku,                   
+            price: item.product.price,   
+            img: item.product.image_url || '',      
+            quantity: item.quantity,                 
+            tiers: item.product.tiers || [], 
         };
         
         if (addToCart) {    
@@ -129,12 +166,17 @@ export default function OrderDetailPage() {
         <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
         Volver
       </button>
+      </div>
         
+<div  className="bg-white p-4 sm:p-8 rounded-xl">
+
+  <div className="text-center mb-8">
         <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
           #PED-{order.id.toString().padStart(4, '0')}
         </h1>
         <p className="text-gray-500 font-medium mt-2">{formatDateTime(order.created_at)}</p>
-      </div>
+
+  </div>
 
       {/* 1. Barra de Progreso */}
       <div className="border border-gray-300 rounded-2xl p-6 mb-10">
@@ -162,7 +204,7 @@ export default function OrderDetailPage() {
 
       {/* 2. Detalles del Cliente y Referencias */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        <div className="space-y-4 text-gray-800 font-medium">
+        <div className="space-y-4 text-gray-800 font-medium text-center">
           <p><span className="font-bold">Cliente:</span> {user?.name}</p>
           <p><span className="font-bold">Método de Pago:</span> <span className="capitalize">{order.payment_method}</span> {order.payment_method === 'tarjeta' && '(Mercado Pago)'}</p>
           <p><span className="font-bold">Dirección de Entrega:</span> {order.address.street_and_number}, {order.address.neighborhood}</p>
@@ -170,7 +212,7 @@ export default function OrderDetailPage() {
         
         <div>
           <h4 className="font-bold text-gray-800 mb-2 text-center lg:text-left">Referencias:</h4>
-          <div className="border border-gray-300 rounded-xl p-4 min-h-[100px] text-gray-600 text-sm">
+          <div className="border border-gray-300 rounded-xl p-4 min-h-25 text-gray-600 text-sm">
             {order.notes || 'Sin referencias registradas.'}
           </div>
         </div>
@@ -203,25 +245,7 @@ export default function OrderDetailPage() {
       </div>
 
       {/* 4. Pie de Página: Botón PDF y Totales */}
-      <div className="flex flex-col-reverse md:flex-row justify-between items-end gap-10">
-        
-       <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-          <button 
-            onClick={() => alert('Generación de PDF en desarrollo...')}
-            className="bg-[#333333] hover:bg-black text-white px-8 py-3 rounded-xl font-bold transition-colors"
-          >
-            Generar Ticket en PDF
-          </button>
-
-          {/* NUEVO BOTÓN DE RECOMPRA */}
-          <button 
-            onClick={() => handleReorder(order)}
-            className="bg-brandSuccess hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-            Volver a Pedir
-          </button>
-        </div>
+       <div className="flex  justify-end mt-10">        
 
         <div className="w-full md:w-80">
           <div className="flex justify-between py-2 text-lg font-bold text-gray-800">
@@ -252,7 +276,31 @@ export default function OrderDetailPage() {
           </div>
         </div>
 
-      </div>
+
+       </div>
+</div>        
+
+        <div className="flex flex-col sm:flex-row gap-4 justify-start mt-8 border-t border-gray-200 pt-8">    
+            <button 
+            onClick={handleGeneratePDF}
+            disabled={isGeneratingPDF}
+            className={`px-8 py-3 rounded-xl font-bold transition-colors ${
+              isGeneratingPDF ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#333333] hover:bg-black text-white'
+            }`}
+          >
+            {isGeneratingPDF ? 'Generando...' : 'Generar Ticket en PDF'}
+          </button>
+
+          {/* BOTÓN DE RECOMPRA */}
+          <button 
+            onClick={() => handleReorder(order)}
+            className="bg-brandSuccess hover:bg-green-700 text-white px-8 py-3 rounded-xl font-bold transition-colors flex items-center justify-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+            Volver a Pedir
+          </button>
+        </div>
+
 
     </div>
   );

@@ -42,7 +42,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/orders/{id}', [OrderController::class, 'show']); 
     Route::post('/orders/calculate', [OrderController::class, 'calculate']);
 
+    Route::get('/orders/{id}/ticket', [OrderController::class, 'downloadTicket']);
+
     Route::post('/orders', [OrderController::class, 'store']);
+
+
+
+    // RUTAS DEL PANEL DE ADMINISTRADOR
+    Route::prefix('admin')->group(function () {
+        
+        Route::get('/orders', [\App\Http\Controllers\Api\Admin\OrderController::class, 'index'])
+            ->middleware('permission:ver_ordenes');
+            
+        Route::put('/orders/{id}/status', [\App\Http\Controllers\Api\Admin\OrderController::class, 'updateStatus'])
+            ->middleware('permission:editar_ordenes');
+
+    });
+
+    
 
 });
 

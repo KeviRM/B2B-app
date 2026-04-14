@@ -13,7 +13,7 @@ use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Client\Payment\PaymentClient;
 
 
-
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class OrderController extends Controller
@@ -208,5 +208,32 @@ class OrderController extends Controller
                 'error' => $e->getMessage()
             ], 422);
         }
+    }
+
+
+
+
+
+    public function downloadTicket(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $order = Order::with(['items.product', 'address'])
+            ->where('id', $id)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        $storeData = [
+            'name' => 'Pa LLevar',
+            'address' => 'Av. Principal 123, Centro, Apizaco, Tlaxcala',
+            'phone' => '+52 241 000 0000',
+            'email' => 'pallevar@gmail.com'
+        ];
+
+        // Genera el PDF usando la vista y datos
+        $pdf = Pdf::loadView('pdf.ticket', compact('order', 'storeData'));
+
+        // Retornamos el archivo para su descarga
+        return $pdf->download("Ticket_PED-000{$order->id}.pdf");
     }
 }

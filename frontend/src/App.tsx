@@ -17,12 +17,17 @@ import OrderDetailPage from './components/OrderDetailPage';
 import LoginPage from './components/LoginPage';
 import RegisterPage from './components/RegisterPage';
 
+
+
+import AdminLayout from './components/admin/AdminLayout';
+import AdminOrdersPage from './components/admin/AdminOrdersPage';
+
 function App() {
   return (
     <div className="min-h-screen font-sans bg-gray-50 flex flex-col">
       <Header />
       
-      <main className="flex-grow">
+      <main className="grow">
         {/* Aquí definimos qué componente se renderiza en qué URL */}
         <Routes>
           <Route path="/" element={<HomePageContent />} />
@@ -37,6 +42,13 @@ function App() {
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
+
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<AdminOrdersPage />} /> 
+            <Route path="ordenes" element={<AdminOrdersPage />} />
+            <Route path="catalogo" element={<div className="font-bold text-2xl">Catálogo en construcción</div>} />
+            <Route path="personal" element={<div className="font-bold text-2xl">Personal en construcción</div>} />
+          </Route>
 
         </Routes>
       </main>

@@ -55,17 +55,6 @@ export default function SidebarFilters({ selectedCategories, onCategoryToggle, o
         )}
       </div>
 
-      <div className="mb-8">
-        <h3 className="font-semibold text-gray-800 mb-3">Marcas Destacadas</h3>
-        <div className="space-y-2">
-          {['Pa\' Llevar'].map((marca) => (
-            <label key={marca} className="flex items-center space-x-2 cursor-pointer group">
-              <input type="checkbox" className="w-4 h-4 text-brandPrimary rounded border-gray-300 focus:ring-brandPrimary" />
-              <span className="text-gray-600 group-hover:text-black transition-colors">{marca}</span>
-            </label>
-          ))}
-        </div>
-      </div>
 
       {/* Conectamos el botón de limpiar */}
       <button 

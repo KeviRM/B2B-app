@@ -62,3 +62,23 @@ export interface ApiOrder {
   items: ApiOrderItem[];
   statusColor: string;
 }
+
+
+
+export interface AdminOrder {
+  id: number;
+  total: string;
+  subtotal: string;
+  shipping_cost: string;
+  status: string;
+  created_at: string;
+  notes: string | null;
+  user: { name: string; email: string };
+  address: { street_and_number: string; neighborhood: string; references: string | null };
+  items: {
+    id: number;
+    quantity: number;
+    price: string;
+    product: { name: string; sku: string };
+  }[];
+}

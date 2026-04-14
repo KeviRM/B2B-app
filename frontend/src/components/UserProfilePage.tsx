@@ -127,11 +127,11 @@ export default function UserProfilePage() {
         const productForCart = {
             id: item.product.id,
             name: item.product.name,
-            sku: item.product.sku,                     // SKU Real de la BD
-            price: item.product.price,                 // Precio Base Real (Ej. $120.00)
-            img: item.product.image_url || '',         // Imagen Real
-            quantity: item.quantity,                   // Cantidad que pidió antes
-            tiers: item.product.tiers || [],           // Sus reglas de descuento
+            sku: item.product.sku,                     
+            price: item.product.price,                 
+            img: item.product.image_url || '',         
+            quantity: item.quantity,                   
+            tiers: item.product.tiers || [],           
         };
         
         if (addToCart) {    
@@ -191,6 +191,7 @@ export default function UserProfilePage() {
             <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black font-bold uppercase">
                {/* Inicial del usuario */}
                {user.name.charAt(0)}
+               
             </div>
             <span className="font-bold text-lg line-clamp-1">{user.name}</span>
           </div>
