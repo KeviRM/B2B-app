@@ -74,13 +74,15 @@ class ProductController extends Controller
             'sku' => 'required|string|unique:products,sku,' . $product->id,
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'category_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
             'tiers' => 'nullable|array'
+            
         ]);
 
         DB::beginTransaction();
         try {
-            $dataToUpdate = $request->only(['name', 'sku', 'price', 'stock', 'description']);
+            $dataToUpdate = $request->only(['name', 'sku', 'price', 'stock', 'description', 'category_id']);
 
             if ($request->hasFile('image')) {
                 $path = $request->file('image')->store('products', 'public');

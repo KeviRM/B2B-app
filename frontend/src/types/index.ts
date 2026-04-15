@@ -82,3 +82,11 @@ export interface AdminOrder {
     product: { name: string; sku: string };
   }[];
 }
+
+
+
+
+export interface ApiCategory {
+  id: number;
+  name: string;
+}

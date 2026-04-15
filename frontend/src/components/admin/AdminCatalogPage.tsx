@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import type { ApiProduct } from '../../types';
-import AdminProductModal from './AdminProductModal'; // <-- 1. IMPORTAR MODAL
+import AdminProductModal from './AdminProductModal'; 
+import AdminCategoryModal from './AdminCategoryModal';
+
 
 export default function AdminCatalogPage() {
   const { token } = useAuth();
@@ -11,6 +13,11 @@ export default function AdminCatalogPage() {
   // 2. ESTADOS DEL MODAL
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productToEdit, setProductToEdit] = useState<ApiProduct | null>(null);
+
+
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+ 
 
   const loadProducts = () => {
     fetch(`${import.meta.env.VITE_API_URL}/admin/products`, {
@@ -59,12 +66,25 @@ export default function AdminCatalogPage() {
     <div className="animate-[fadeIn_0.3s_ease-out]">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Catálogo y Precios</h1>
+
+
+        <div className="flex gap-3">
+
+        <button 
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="bg-white border border-gray-300 hover:border-gray-500 text-gray-700 px-4 py-3 rounded-xl font-bold transition-colors flex items-center gap-2 shadow-sm"
+          >
+             Categorías
+          </button>
         <button 
           onClick={handleAddNew} 
           className="bg-[#333333] hover:bg-black text-white px-6 py-3 rounded-xl font-bold transition-colors flex items-center gap-2"
         >
           <span>+</span> Agregar Producto
         </button>
+
+        </div>
+
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-300 overflow-hidden">
@@ -123,6 +143,11 @@ export default function AdminCatalogPage() {
         onSave={loadProducts}
         productToEdit={productToEdit}
       />
+
+      <AdminCategoryModal 
+     isOpen={isCategoryModalOpen}
+     onClose={() => setIsCategoryModalOpen(false)}
+   />
 
     </div>
   );

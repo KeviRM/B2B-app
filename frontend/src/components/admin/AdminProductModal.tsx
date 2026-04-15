@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import type { ApiProduct, Tier } from '../../types';
+import type { ApiProduct, Tier, ApiCategory } from '../../types';
 
 interface AdminProductModalProps {
   isOpen: boolean;
@@ -13,13 +13,16 @@ export default function AdminProductModal({ isOpen, onClose, onSave, productToEd
   const { token } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+   const [categories, setCategories] = useState<ApiCategory[]>([]);
+
   // Estado del formulario básico
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
     price: '',
     stock: '',
-    description: ''
+    description: '',
+    category_id: ''
   });
 
   // Estado para la tabla dinámica de reglas de mayoreo
@@ -30,6 +33,17 @@ export default function AdminProductModal({ isOpen, onClose, onSave, productToEd
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch(`${import.meta.env.VITE_API_URL}/admin/categories`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => setCategories(data));
+    }
+  }, [isOpen, token]);
+
   // Si pasan un producto para editar, llenamos los campos
   useEffect(() => {
     if (productToEdit) {
@@ -38,13 +52,14 @@ export default function AdminProductModal({ isOpen, onClose, onSave, productToEd
         sku: productToEdit.sku,
         price: productToEdit.price.toString(),
         stock: productToEdit.stock.toString(),
-        description: productToEdit.description || ''
+        description: productToEdit.description || '',
+        category_id: productToEdit.category_id?.toString() || ''
       });
       setTiers(productToEdit.tiers || []);
       setPreviewUrl(productToEdit.image_url);
     } else {
       // Limpiar si es un producto nuevo
-      setFormData({ name: '', sku: '', price: '', stock: '', description: '' });
+      setFormData({ name: '', sku: '', price: '', stock: '', description: '', category_id: '' });
       setTiers([]);
       setPreviewUrl(null);
     }
@@ -90,6 +105,7 @@ export default function AdminProductModal({ isOpen, onClose, onSave, productToEd
     formDataToSend.append('price', formData.price);
     formDataToSend.append('stock', formData.stock);
     formDataToSend.append('description', formData.description);
+    formDataToSend.append('category_id', formData.category_id);
     
     tiers.forEach((tier, index) => {
       formDataToSend.append(`tiers[${index}][min_quantity]`, tier.min_quantity.toString());
@@ -179,6 +195,16 @@ export default function AdminProductModal({ isOpen, onClose, onSave, productToEd
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">SKU (Código único)</label>
                 <input required type="text" value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:border-black font-medium uppercase" placeholder="Ej. PAL-TRAD-250" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1">Categoría</label>
+                <select required value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} className="w-full px-4 py-2 border border-gray-300 rounded-xl outline-none focus:border-black font-medium bg-white">
+                  <option value="" disabled>Selecciona una...</option>
+                  {categories.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-1">Stock Actual (Piezas)</label>

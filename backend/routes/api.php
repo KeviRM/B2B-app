@@ -71,7 +71,12 @@ Route::middleware('auth:sanctum')->group(function () {
             ->middleware('permission:editar_productos');
             
         Route::delete('/products/{id}', [\App\Http\Controllers\Api\Admin\ProductController::class, 'destroy'])
-            ->middleware('permission:editar_productos'); // Solo quien edita puede borrar
+            ->middleware('permission:editar_productos'); 
+
+        // Rutas de Categorías
+        Route::apiResource('categories', \App\Http\Controllers\Api\Admin\CategoryController::class)
+            ->middleware('permission:editar_productos'); 
+            
 
     });
 
