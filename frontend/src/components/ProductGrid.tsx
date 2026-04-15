@@ -134,8 +134,13 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
                 to={`/producto/${product.id}`}
                 className="h-48 bg-gray-50 flex items-center justify-center text-6xl group-hover:scale-105 transition-transform duration-300"
               >
-                imagen
+                <img 
+  src={product.image_url || 'https://via.placeholder.com/400'} 
+  alt={product.name} 
+  className="w-full h-full object-cover" 
+/>
               </Link>  
+              
               
               
               <div className="p-5 flex flex-col flex-1">

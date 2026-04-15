@@ -22,6 +22,9 @@ import RegisterPage from './components/RegisterPage';
 import AdminLayout from './components/admin/AdminLayout';
 import AdminOrdersPage from './components/admin/AdminOrdersPage';
 
+import AdminStaffPage from './components/admin/AdminStaffPage';
+import AdminCatalogPage from './components/admin/AdminCatalogPage';
+
 function App() {
   return (
     <div className="min-h-screen font-sans bg-gray-50 flex flex-col">
@@ -46,8 +49,9 @@ function App() {
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminOrdersPage />} /> 
             <Route path="ordenes" element={<AdminOrdersPage />} />
-            <Route path="catalogo" element={<div className="font-bold text-2xl">Catálogo en construcción</div>} />
-            <Route path="personal" element={<div className="font-bold text-2xl">Personal en construcción</div>} />
+            <Route path="catalogo" element={<AdminCatalogPage />} />
+
+            <Route path="personal" element={<AdminStaffPage />} />
           </Route>
 
         </Routes>

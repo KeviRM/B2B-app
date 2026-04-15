@@ -57,6 +57,22 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/orders/{id}/status', [\App\Http\Controllers\Api\Admin\OrderController::class, 'updateStatus'])
             ->middleware('permission:editar_ordenes');
 
+        Route::apiResource('staff', \App\Http\Controllers\Api\Admin\StaffController::class)
+            ->middleware('permission:gestionar_personal');
+
+         // Rutas del Catálogo
+        Route::get('/products', [\App\Http\Controllers\Api\Admin\ProductController::class, 'index'])
+            ->middleware('permission:ver_catalogo');
+            
+        Route::post('/products', [\App\Http\Controllers\Api\Admin\ProductController::class, 'store'])
+            ->middleware('permission:crear_productos');
+            
+        Route::put('/products/{id}', [\App\Http\Controllers\Api\Admin\ProductController::class, 'update'])
+            ->middleware('permission:editar_productos');
+            
+        Route::delete('/products/{id}', [\App\Http\Controllers\Api\Admin\ProductController::class, 'destroy'])
+            ->middleware('permission:editar_productos'); // Solo quien edita puede borrar
+
     });
 
     
