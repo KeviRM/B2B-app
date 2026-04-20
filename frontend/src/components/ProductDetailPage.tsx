@@ -57,7 +57,7 @@ export default function ProductDetailPage() {
   const currentPrice = getCurrentPrice();
   const total = currentPrice * quantity;
 
-  // 3. Función para construir las filas de la tabla usando los tiers ordenados
+  // Función para construir las filas de la tabla usando los tiers ordenados
   const buildTierRows = () => {
     const rows = [];
     
@@ -90,10 +90,10 @@ export default function ProductDetailPage() {
       id: product.id,
       sku: product.sku,
       name: product.name,
-      price: product.price, // Precio base puro directo de la BD
+      price: product.price,
       quantity: quantity,
       img: product.image_url || 'x', 
-      tiers: product.tiers // 🚀 LA PIEZA FALTANTE: Ahora sí le mandamos las reglas al Carrito
+      tiers: product.tiers // 
     });
      navigate('/catalogo'); 
   };
@@ -117,7 +117,9 @@ export default function ProductDetailPage() {
         <div className="w-full md:w-1/2 flex flex-col gap-4">
           {/* Imagen Principal */}
           <div className="w-full aspect-square bg-[#666666] text-white flex items-center justify-center text-4xl font-bold tracking-widest relative">
-             <span className="transform -rotate-45 absolute opacity-50">IMAGEN</span>
+             <img 
+             src={product.image_url||'https://via.placeholder.com/400'} 
+             alt={product.name} className="w-full h-full object-cover" />
           </div>
           {/* Miniaturas */}
           <div className="flex gap-4">

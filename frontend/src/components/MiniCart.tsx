@@ -38,7 +38,7 @@ export default function MiniCart() {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
           {cart.length === 0 ? (
             <div className="text-center text-gray-500 mt-10">
-              <span className="text-4xl mb-4 block"></span>
+              <span className="text-4xl mb-4 block"> </span>
               <p>Tu carrito está vacío.</p>
             </div>
           ) : (
@@ -46,7 +46,7 @@ export default function MiniCart() {
               {cart.map((item) => (
                 <div key={item.id} className="flex items-center gap-4 border-b border-gray-100 pb-4">
                   <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-3xl">
-                    {item.img}
+                    <img src={item.img} alt={item.name} className="w-full h-full object-contain" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-bold text-gray-800 line-clamp-2">{item.name}</h3>

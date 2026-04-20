@@ -230,6 +230,7 @@ export default function CheckoutPage() {
                         onChange={() => {
                           setSelectedAddressId(addr.id);
                           setOrderNotes(addr.references || ''); 
+
                         }}
                         className="w-6 h-6 text-blue-500 border-gray-300 focus:ring-blue-500" 
                       />
@@ -241,9 +242,12 @@ export default function CheckoutPage() {
                 )}
                 
               </div>
-              <Link to="/perfil" className="inline-block px-6 py-2 border border-gray-400 rounded-lg text-gray-800 font-bold hover:bg-gray-50 transition-colors">
+              
+              <button 
+                onClick={() => navigate('/perfil', { state: { activeTab: 'Información personal' } })}
+                className="inline-block px-6 py-2 border border-gray-400 rounded-lg text-gray-800 font-bold hover:bg-gray-50 transition-colors">
                 + Agrega nueva dirección
-              </Link>
+              </button>
             </div>
 
             {/* Referencias */}
@@ -254,6 +258,7 @@ export default function CheckoutPage() {
                 onChange={(e) => setOrderNotes(e.target.value)}
                 className="w-full h-32 p-4 border border-gray-400 rounded-xl resize-y outline-none focus:ring-2 focus:ring-gray-800 focus:border-transparent"
                 placeholder="Ej. Portón blanco, frente al parque..."
+                maxLength={200}
               ></textarea>
             </div>
           </div>

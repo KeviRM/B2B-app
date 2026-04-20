@@ -172,7 +172,7 @@ export default function UserProfilePage() {
       <div className="flex items-center mb-10 relative border-b border-gray-300 pb-6">
         <div className="flex">
 
-        <Link to="/" className="absolute left-0 flex items-center text-gray-600 hover:text-black font-semibold">
+        <Link to={-1} className="absolute left-0 flex items-center text-gray-600 hover:text-black font-semibold">
           <svg className="w-8 h-8 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
           <span className="text-sm font-bold">Volver</span>
         </Link>
@@ -312,7 +312,12 @@ export default function UserProfilePage() {
                        </div>
                        <div>
                          <label className="block text-sm font-bold text-gray-700 mb-1">Referencias (Opcional)</label>
-                         <input type="text" value={newAddress.references} onChange={(e) => setNewAddress({...newAddress, references: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none focus:border-black" placeholder="Portón negro junto a la tienda" />
+                         <input type="text" 
+                         value={newAddress.references} 
+                         onChange={(e) => setNewAddress({...newAddress, references: e.target.value})} 
+                         className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none focus:border-black" 
+                         maxLength={200}
+                         placeholder="Portón negro junto a la tienda"  />
                        </div>
                      </div>
                      <div className="flex gap-3">

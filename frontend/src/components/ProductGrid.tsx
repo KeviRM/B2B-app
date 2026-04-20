@@ -193,7 +193,7 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
                       price: `$${product.price}`,
                       bulkPrice: firstTier ? `$${firstTier.price}` : `$${product.price}`,
                       quantity: quantity,
-                      img: ''
+                      img: product.image_url || 'https://via.placeholder.com/400',  
                     })}
                     className="flex-1 bg-gray-900 text-white font-bold py-2 rounded-md hover:bg-brandPrimary transition-colors flex justify-center items-center"
                   >

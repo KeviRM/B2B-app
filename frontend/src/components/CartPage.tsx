@@ -149,7 +149,7 @@ export default function CartPage() {
                     {/* Imagen y Nombre */}
                     <div className="col-span-5 flex items-center gap-4">
                       <div className="w-20 h-20 bg-gray-600 rounded shrink-0 flex items-center justify-center text-3xl">
-                        {item.img}
+                        <img src={item.img} alt={item.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-800 text-lg leading-tight mb-1">{item.name}</h3>
