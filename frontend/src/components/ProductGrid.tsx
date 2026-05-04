@@ -27,7 +27,7 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('relevancia');
 
-  const [quantity, setQuantity] = useState(1);
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/products`)
@@ -171,30 +171,26 @@ export default function ProductGrid({ selectedCategories }: ProductGridProps) {
 
                   <input 
                     type="number"
-                    defaultValue= "1"
-                    
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-
+                    value={quantities[product.id] || 1}
+                    onChange={(e) => setQuantities({ ...quantities, [product.id]: Math.max(1, parseInt(e.target.value) || 1) })}
                     min="1" 
                     className="w-16 border border-gray-300 rounded-md text-center focus:ring-2 focus:ring-brandPrimary outline-none font-bold"
                   />
 
-
-
-
-
-
-
                   <button 
-                    onClick={() => addToCart({
-                      id: product.id,
-                      sku: product.sku,
-                      name: product.name,
-                      price: `$${product.price}`,
-                      bulkPrice: firstTier ? `$${firstTier.price}` : `$${product.price}`,
-                      quantity: quantity,
-                      img: product.image_url || 'https://via.placeholder.com/400',  
-                    })}
+                    onClick={() => {
+                      addToCart({
+                        id: product.id,
+                        sku: product.sku,
+                        name: product.name,
+                        price: `$${product.price}`,
+                        bulkPrice: firstTier ? `$${firstTier.price}` : `$${product.price}`,
+                        quantity: quantities[product.id] || 1,
+                        img: product.image_url || 'https://via.placeholder.com/400',  
+                        tiers: product.tiers,
+                      });
+                      setQuantities({ ...quantities, [product.id]: 1 }); // Opcional: resetear a 1 después de añadir
+                    }}
                     className="flex-1 bg-gray-900 text-white font-bold py-2 rounded-md hover:bg-brandPrimary transition-colors flex justify-center items-center"
                   >
                     <span className="mr-2">+</span> Agregar

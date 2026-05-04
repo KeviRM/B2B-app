@@ -174,10 +174,10 @@ export default function CartPage() {
                           -
                         </button>
                         <input 
-                          type="text" 
+                          type="number" 
                           value={item.quantity} 
-                          readOnly 
-                          className="w-10 text-center font-bold text-gray-900 border-x border-gray-300 py-1 outline-none" 
+                          onChange={(e) => updateQuantity(item.id, Math.max(1, parseInt(e.target.value) || 1))}
+                          className="w-16 text-center font-bold text-gray-900 border-x border-gray-300 py-1 outline-none" 
                         />
                         <button 
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}

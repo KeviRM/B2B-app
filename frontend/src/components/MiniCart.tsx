@@ -3,7 +3,7 @@ import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function MiniCart() {
-  const { cart, isCartOpen, closeCart, removeFromCart } = useCart();
+  const { cart, isCartOpen, closeCart, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
 
   // Si no está abierto, no renderizamos nada
@@ -13,6 +13,29 @@ export default function MiniCart() {
   const goToCheckout = () => {
     closeCart();
     navigate('/carrito');
+  };
+
+  const getNumericPrice = (priceStr: string) => {
+    return parseFloat(priceStr.replace(/[^0-9.-]+/g, '')) || 0;
+  };
+
+  const getCurrentPrice = (item: any) => {
+    let currentPrice = getNumericPrice(item.price);
+    
+    if (item.tiers && item.tiers.length > 0) {
+      const applicableTier = [...item.tiers]
+        .filter((t: any) => item.quantity >= t.min_quantity)
+        .sort((a: any, b: any) => b.min_quantity - a.min_quantity)[0];
+        
+      if (applicableTier) {
+        currentPrice = parseFloat(applicableTier.price);
+      }
+    } 
+    else if (item.bulkPrice && item.quantity >= 12) {
+      currentPrice = getNumericPrice(item.bulkPrice);
+    }
+    
+    return currentPrice;
   };
 
   return (
@@ -50,8 +73,27 @@ export default function MiniCart() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-sm font-bold text-gray-800 line-clamp-2">{item.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1">Cant: {item.quantity} cajas</p>
-                    <p className="text-brandSuccess font-bold mt-1">{item.bulkPrice}</p>
+                    <div className="flex items-center border border-gray-300 rounded-md mt-1 w-24">
+                      <button 
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        className="px-2 font-bold text-gray-600 hover:text-black transition-colors"
+                      >
+                        -
+                      </button>
+                      <input 
+                        type="number" 
+                        value={item.quantity} 
+                        onChange={(e) => updateQuantity(item.id, Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-full text-center font-bold text-gray-900 border-x border-gray-300 py-0.5 outline-none text-sm" 
+                      />
+                      <button 
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        className="px-2 font-bold text-gray-600 hover:text-black transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                    <p className="text-brandSuccess font-bold mt-1">${getCurrentPrice(item).toFixed(2)} c/u</p>
                   </div>
                   <button onClick={() => removeFromCart(item.id)} className="text-gray-500 hover:text-red-500 p-2">
                     {/* trash */}

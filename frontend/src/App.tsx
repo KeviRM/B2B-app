@@ -21,6 +21,7 @@ import RegisterPage from './components/RegisterPage';
 
 import AdminLayout from './components/admin/AdminLayout';
 import AdminOrdersPage from './components/admin/AdminOrdersPage';
+import AdminDashboardPage from './components/admin/AdminDashboardPage';
 
 import AdminStaffPage from './components/admin/AdminStaffPage';
 import AdminCatalogPage from './components/admin/AdminCatalogPage';
@@ -47,7 +48,9 @@ function App() {
           <Route path="/registro" element={<RegisterPage />} />
 
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminOrdersPage />} /> 
+            
+            <Route index element={<AdminDashboardPage />} /> 
+            
             <Route path="ordenes" element={<AdminOrdersPage />} />
             <Route path="catalogo" element={<AdminCatalogPage />} />
 

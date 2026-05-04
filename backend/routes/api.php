@@ -50,6 +50,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // RUTAS DEL PANEL DE ADMINISTRADOR
     Route::prefix('admin')->group(function () {
+
         
         Route::get('/orders', [\App\Http\Controllers\Api\Admin\OrderController::class, 'index'])
             ->middleware('permission:ver_ordenes');
@@ -76,6 +77,10 @@ Route::middleware('auth:sanctum')->group(function () {
         // Rutas de Categorías
         Route::apiResource('categories', \App\Http\Controllers\Api\Admin\CategoryController::class)
             ->middleware('permission:editar_productos'); 
+
+
+        Route::get('/dashboard', [\App\Http\Controllers\Api\Admin\DashboardController::class, 'index'])
+            ->middleware('permission:ver_ordenes|ver_catalogo');
             
 
     });

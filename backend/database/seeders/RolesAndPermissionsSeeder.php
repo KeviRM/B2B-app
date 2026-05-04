@@ -5,56 +5,45 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
     public function run()
     {
-        // Limpia el caché de Spatie para evitar errores
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        // Limpia el caché de Spatie físicamente
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-        ///CREAR PERMISOS//
+        // Forzamos el 'guard' a web (el predeterminado de Sanctum/SPA)
+        $guard = 'web'; 
 
-        // Órdenes
-        Permission::create(['name' => 'ver_ordenes']);
-        Permission::create(['name' => 'editar_ordenes']);
-        Permission::create(['name' => 'eliminar_ordenes']);
-        
-        // Catálogo
-        Permission::create(['name' => 'ver_catalogo']);
-        Permission::create(['name' => 'crear_productos']);
-        Permission::create(['name' => 'editar_productos']);
-        Permission::create(['name' => 'gestionar_tiers']);
+        /// 1. CREAR PERMISOS ///
+        $permisos = [
+            'ver_ordenes', 'editar_ordenes', 'eliminar_ordenes',
+            'ver_catalogo', 'crear_productos', 'editar_productos', 'gestionar_tiers',
+            'ver_personal', 'gestionar_personal'
+        ];
 
-        // Personal
-        Permission::create(['name' => 'ver_personal']);
-        Permission::create(['name' => 'gestionar_personal']);
+        foreach ($permisos as $permiso) {
+            Permission::firstOrCreate(['name' => $permiso, 'guard_name' => $guard]);
+        }
 
-        // CREAR ROLES Y ASIGNAR PERMISOS 
-        
-        // Rol: Almacén 
-        $roleAlmacen = Role::create(['name' => 'Almacén']);
-        $roleAlmacen->givePermissionTo('ver_ordenes');
+        /// 2. CREAR ROLES Y ASIGNAR ///
 
-        // Rol: Ventas 
-        $roleVentas = Role::create(['name' => 'Ventas']);
-        $roleVentas->givePermissionTo([
-            'ver_ordenes',
-            'editar_ordenes',
-            'ver_catalogo'
-        ]);
+        // Rol: Almacén
+        $roleAlmacen = Role::firstOrCreate(['name' => 'Almacén', 'guard_name' => $guard]);
+        $roleAlmacen->syncPermissions(['ver_ordenes']);
 
-        // Rol: Gerente de Catálogo 
-        $roleCatalogo = Role::create(['name' => 'Gerente de Catálogo']);
-        $roleCatalogo->givePermissionTo([
-            'ver_catalogo',
-            'crear_productos',
-            'editar_productos',
-            'gestionar_tiers'
-        ]);
+        // Rol: Ventas
+        $roleVentas = Role::firstOrCreate(['name' => 'Ventas', 'guard_name' => $guard]);
+        $roleVentas->syncPermissions(['ver_ordenes', 'editar_ordenes', 'ver_catalogo']);
+
+        // Rol: Gerente de Catálogo
+        $roleCatalogo = Role::firstOrCreate(['name' => 'Gerente de Catálogo', 'guard_name' => $guard]);
+        $roleCatalogo->syncPermissions(['ver_catalogo', 'crear_productos', 'editar_productos', 'gestionar_tiers']);
 
         // Rol: Super Admin
-        $roleAdmin = Role::create(['name' => 'Super Admin']);
-        $roleAdmin->givePermissionTo(Permission::all());
+        $roleAdmin = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => $guard]);
+        $roleAdmin->syncPermissions(Permission::all());
     }
 }
